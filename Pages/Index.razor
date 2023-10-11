@@ -1,0 +1,177 @@
+﻿@page "/"
+@using SpotifyAPI.Web
+@inject NavigationManager navManager
+
+@* UI to show mixing desk with sliders of parameters to meet e.g. instrumentalness, tempo etc
+App will get all users songs and generate playlist meeting parameters
+ *@
+
+<PageTitle>Spotify Login</PageTitle>
+
+@if (_isAuthed && _me != null)
+{
+    @if (!_activeDevice)
+    {
+        <h2>Welcome @_me.DisplayName!</h2>
+        <p>
+            Please select a device:
+            <div>
+                <ul>
+                    @foreach (var device in _devicesList)
+                    {
+                        <button id=@device.Name>
+                            <a @onclick="() => ChooseDevice(device)">@device.Name</a>
+                        </button>
+                    }
+                </ul>
+            </div>
+        </p>
+    }
+    else
+    {
+        <h2>Welcome @_me.DisplayName!</h2>
+        <p>
+            You have a grant total of @_totalPlaylistCount playlists!
+        </p>
+        if (_selectedPlaylist is null)
+        {
+            @foreach (var playlist in _playlists)
+            {
+                <tr>
+                    <td>
+                        <button @onclick="(() => GetTracksFromPlaylist(playlist))">@playlist.Name</button>
+                    </td>
+                    <td>@playlist.Tracks.Total</td>
+                </tr>
+            }
+        }
+        if (_selectedPlaylist is not null)
+        {
+            <p>@_selectedPlaylist.Name</p>
+            var totalTracks = $"Total number of tracks: {_selectedPlaylist.Tracks.Total}";
+            <p>@totalTracks</p>
+
+            _isPlaying = _spotify.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest()).Result.IsPlaying;
+            
+            @if (_isPlaying)
+            {
+                <button id="pause" @onclick="Pause">Pause</button>
+            }
+            else if (!_isPlaying)
+            {
+                <button id="play" @onclick="Play">Play</button>
+            }
+            <button id="skip" @onclick="Skip">Skip</button>
+            <button @onclick="GoBackToPlaylists">Back to Playlists</button>
+            
+            <p>@_isPlaying</p>
+        }
+    }
+}
+else
+{
+    <span>To get started:</span>
+    <a href="@_authUri">
+        Login via Spotify
+    </a>
+}
+
+
+
+@code {
+
+    private Uri _authUri;
+
+    private bool _isAuthed;
+    private SimplePlaylist? _selectedPlaylist;
+
+    private PrivateUser _me;
+
+    private int? _totalPlaylistCount;
+
+    private List<SimplePlaylist>? _playlists;
+
+    private Dictionary<string, string>? _fragmentParams;
+
+    private SpotifyClient _spotify;
+
+    private DeviceResponse _devices;
+
+    private List<Device> _devicesList;
+
+    private bool _activeDevice;
+
+    private bool _isPlaying;
+
+    protected override void OnInitialized()
+    {
+        var clientId = "716a29344d854ebcbdbe2ea5394848d4";
+        var baseUri = navManager.ToAbsoluteUri(navManager.BaseUri);
+
+        var loginRequest = new LoginRequest(baseUri, clientId, LoginRequest.ResponseType.Token)
+        {
+            Scope = new[] { Scopes.PlaylistReadPrivate, Scopes.PlaylistReadCollaborative, Scopes.AppRemoteControl, Scopes.Streaming, Scopes.UserModifyPlaybackState, Scopes.UserReadCurrentlyPlaying, Scopes.UserReadPlaybackState }
+        };
+        _authUri = loginRequest.ToUri();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = new Uri(navManager.Uri);
+        var maxLen = Math.Min(1, uri.Fragment.Length);
+        _fragmentParams = uri.Fragment.Substring(maxLen)?
+            .Split("&", StringSplitOptions.RemoveEmptyEntries)?
+            .Select(param => param.Split("=", StringSplitOptions.RemoveEmptyEntries))?
+            .ToDictionary(param => param[0], param => param[1]) ?? new Dictionary<string, string>();
+
+        _isAuthed = _fragmentParams.ContainsKey("access_token");
+        if (_isAuthed)
+        {
+            _spotify = new SpotifyClient(_fragmentParams["access_token"]);
+
+            _me = await _spotify.UserProfile.Current();
+            _totalPlaylistCount = (await _spotify.Playlists.CurrentUsers()).Total;
+            _playlists = (await _spotify.Playlists.CurrentUsers()).Items;
+
+            _devices = await _spotify.Player.GetAvailableDevices();
+
+            _devicesList = _devices.Devices;
+        }
+    }
+
+    public async Task ChooseDevice(Device device)
+    {
+        _activeDevice = await _spotify.Player.TransferPlayback(new PlayerTransferPlaybackRequest(new List<string> { device.Id }));
+    }
+
+    public async Task Play()
+    {
+        await _spotify.Player.ResumePlayback(new PlayerResumePlaybackRequest
+        {
+            ContextUri = $"spotify:playlist:{_selectedPlaylist.Id}",
+            // OffsetParam = _spotify.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest()).Result.Item,
+            PositionMs = _spotify.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest()).Result.ProgressMs
+        });
+    }
+
+    public async Task Skip()
+    {
+        await _spotify.Player.SkipNext();
+    }
+
+    public async Task Pause()
+    {
+        await _spotify.Player.PausePlayback();
+    }
+
+    public void GetTracksFromPlaylist(SimplePlaylist playlist)
+    {
+        _selectedPlaylist = playlist;
+    }
+
+    public void GoBackToPlaylists()
+    {
+        _selectedPlaylist = null;
+    }
+
+}

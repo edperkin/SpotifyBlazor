@@ -1,0 +1,55 @@
+﻿@page "/spotify"
+@using SpotifyBlazor.Data
+@using SpotifyAPI.Web
+@inject SpotifyService spotify
+@inject NavigationManager navManager
+
+<PageTitle>Spotify</PageTitle>
+
+<h1>Spotify</h1>
+
+<p>View Playlist below</p>
+
+@if (songs == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Song Name</th>
+            <th>Album</th>
+            <th>Duration (Minutes)</th>
+            <th>Popularity</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var song in songs)
+        {
+            <tr>
+                <td>@song.Song</td>
+                <td>@song.Album</td>
+                <td>@song.TrackLength</td>
+                <td>@song.Popularity</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Data.Spotify> songs;
+
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthStat { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        songs = await spotify.GetPlaylist();
+    }
+}
