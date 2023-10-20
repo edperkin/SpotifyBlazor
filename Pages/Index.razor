@@ -1,6 +1,8 @@
 ﻿@page "/"
 @using SpotifyAPI.Web
 @using SpotifyBlazor.Controllers
+@using SpotifyBlazor.Data
+@using SpotifyBlazor.Models
 @inject NavigationManager navManager
 
 @* UI to show mixing desk with sliders of parameters to meet e.g. instrumentalness, tempo etc
@@ -53,9 +55,9 @@ App will get all users songs and generate playlist meeting parameters
             <p>@totalTracks</p>
 
             SpotifyClientController.IsPlaying = _spotify.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest()).Result.IsPlaying;
-            
+
             <button id="previous" @onclick="() => SpotifyClientController.Previous(_spotify)">Previous</button>
-            
+
             @if (SpotifyClientController.IsPlaying)
             {
                 <button id="pause" @onclick="() => SpotifyClientController.Pause(_spotify)">Pause</button>
@@ -66,8 +68,44 @@ App will get all users songs and generate playlist meeting parameters
             }
             <button id="next" @onclick="() => SpotifyClientController.Next(_spotify)">Next</button>
             <button @onclick="GoBackToPlaylists">Back to Playlists</button>
-            
+
             <p>@SpotifyClientController.IsPlaying</p>
+
+            <EditForm Model="_trackRequirements" OnValidSubmit="@(() => TrackService.GetFeatures(_spotify, _selectedPlaylist))">
+                <div class="mb-3">
+                    <label for="instrumentalness" class="form-label">Instrumentalness:</label>
+                    <input @bind="TrackRequirements.Instrumentalness" type="number" step="0.01" id="instrumentalness" class="form-control" name="instrumentalness">
+                </div>
+                <div class="mb-3">
+                    <label for="speechiness" class="form-label">Speechiness:</label>
+                    <input @bind="TrackRequirements.Speechiness" type="number" step="0.01" id="speechiness" class="form-control" name="speechiness">
+                </div>
+                <input type="submit" value="Submit" class="btn btn-primary">
+            </EditForm>
+            <br/>
+
+            if (TrackService.MatchingTracks is not null)
+            {
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Instrumentalness</th>
+                        <th scope="col">Speechiness</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var track in TrackService.MatchingTracks)
+                    {
+                        <tr>
+                            <td>@track.Name</td>
+                            <td>@track.Instrumentalness</td>
+                            <td>@track.Speechiness</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
         }
     }
 }
@@ -79,8 +117,6 @@ else
     </a>
 }
 
-
-
 @code {
 
     private Uri _authUri;
@@ -90,21 +126,23 @@ else
     private PrivateUser _me;
 
     private Dictionary<string, string>? _fragmentParams;
-    
+
     private int? _totalPlaylistCount;
 
     private List<SimplePlaylist>? _playlists;
-    
+
     private SimplePlaylist? _selectedPlaylist;
-    
+
     private SpotifyClient _spotify;
 
     private DeviceResponse _devices;
 
     private List<Device> _devicesList;
-    
+
     private bool _isPlaying;
 
+    private readonly TrackRequirements _trackRequirements = new();
+    
     protected override void OnInitialized()
     {
         var clientId = "716a29344d854ebcbdbe2ea5394848d4";
@@ -140,15 +178,15 @@ else
             _devicesList = _devices.Devices;
         }
     }
-    
+
     private void GetTracksFromPlaylist(SimplePlaylist playlist)
     {
         _selectedPlaylist = playlist;
     }
-    
+
     private void GoBackToPlaylists()
     {
         _selectedPlaylist = null;
+        TrackService.MatchingTracks = null;
     }
-
 }

@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Http.HttpResults;
-using SpotifyAPI.Web;
+﻿using SpotifyAPI.Web;
 
 namespace SpotifyBlazor.Data;
 
