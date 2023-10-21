@@ -6,8 +6,8 @@ namespace SpotifyBlazor.Data;
 public class TrackService
 {
     public static List<Track>? MatchingTracks;
-    
-    public static void GetFeatures(SpotifyClient spotify, SimplePlaylist selectedPlaylist)
+
+    public static void GetAudioFeatures(SpotifyClient spotify, SimplePlaylist selectedPlaylist)
     {
         MatchingTracks = null;
 
@@ -15,11 +15,17 @@ public class TrackService
         {
             if (item.Track is not FullTrack track) continue;
 
-            var trackFeatures = spotify.Tracks.GetAudioFeatures(track.Id).Result;
+            var trackAudioFeatures = spotify.Tracks.GetAudioFeatures(track.Id).Result;
 
-            if (trackFeatures.Instrumentalness > TrackRequirements.Instrumentalness && trackFeatures.Speechiness < TrackRequirements.Speechiness)
+            var instrumentalnessRange = GetRange(0.1, trackAudioFeatures.Instrumentalness, TrackRequirements.Instrumentalness);
+            var speechinessRange = GetRange(0.1, trackAudioFeatures.Speechiness, TrackRequirements.Speechiness);
+            var valenceRange = GetRange(0.1, trackAudioFeatures.Valence, TrackRequirements.Valence);
+
+            if (instrumentalnessRange && speechinessRange && valenceRange)
             {
-                Console.WriteLine(track.Name + " Instrumentalness:" + trackFeatures.Instrumentalness + " Speechiness:" + trackFeatures.Speechiness);
+                Console.WriteLine(track.Name + " Instrumentalness:" + trackAudioFeatures.Instrumentalness +
+                                  " Speechiness:" + trackAudioFeatures.Speechiness + " Valence:" +
+                                  trackAudioFeatures.Valence);
 
                 if (MatchingTracks is null)
                 {
@@ -28,8 +34,9 @@ public class TrackService
                         new()
                         {
                             Name = track.Name,
-                            Instrumentalness = trackFeatures.Instrumentalness,
-                            Speechiness = trackFeatures.Speechiness
+                            Instrumentalness = trackAudioFeatures.Instrumentalness,
+                            Speechiness = trackAudioFeatures.Speechiness,
+                            Valence = trackAudioFeatures.Valence
                         }
                     };
                 }
@@ -38,13 +45,19 @@ public class TrackService
                     MatchingTracks.Add(new Track
                     {
                         Name = track.Name,
-                        Instrumentalness = trackFeatures.Instrumentalness,
-                        Speechiness = trackFeatures.Speechiness
+                        Instrumentalness = trackAudioFeatures.Instrumentalness,
+                        Speechiness = trackAudioFeatures.Speechiness,
+                        Valence = trackAudioFeatures.Valence
                     });
                 }
             }
         }
-        
+
         Console.WriteLine("Submitted");
+    }
+
+    private static bool GetRange(double range, float audioFeature, float requirement)
+    {
+        return requirement >= audioFeature - range && requirement <= audioFeature + range;
     }
 }
