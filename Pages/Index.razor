@@ -34,7 +34,7 @@ App will get all users songs and generate playlist meeting parameters
     {
         <h2>Welcome @_me.DisplayName!</h2>
         <p>
-            You have a grant total of @_totalPlaylistCount playlists!
+            You have a grand total of @_totalPlaylistCount playlists!
         </p>
         if (_selectedPlaylist is null)
         {
@@ -72,28 +72,36 @@ App will get all users songs and generate playlist meeting parameters
             <p>@SpotifyClientController.IsPlaying</p>
 
             <EditForm Model="_trackRequest" OnValidSubmit="@(() => TrackService.GetAudioFeatures(_spotify, _selectedPlaylist))">
-                <div class="row gy-2 gx-3 align-items-center">
-                    <div class="range">
-                        <label for="instrumentalness">Instrumentalness:</label>
-                        <input @bind="TrackRequest.Instrumentalness" type="range" min="0" max="100" id="instrumentalness" name="instrumentalness" oninput="rangeValue1.innerText = this.value">
-                        <p id="rangeValue1">0</p>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm">
+                            <div class="range">
+                                <label for="instrumentalness">Instrumentalness:</label>
+                                <input @bind="TrackRequest.Instrumentalness" type="range" min="0" max="100" id="instrumentalness" name="instrumentalness" oninput="rangeValue1.innerText = this.value">
+                                <p id="rangeValue1">0</p>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="col-sm">
+                            <div class="range">
+                                <label for="speechiness">Speechiness:</label>
+                                <input @bind="TrackRequest.Speechiness" type="range" min="0" max="100" id="speechiness" name="speechiness" oninput="rangeValue2.innerText = this.value">
+                                <p id="rangeValue2">0</p>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="col-sm">
+                            <div class="range">
+                                <label for="valence">Valence:</label>
+                                <input @bind="TrackRequest.Valence" type="range" min="0" max="100" id="valence" name="valence" oninput="rangeValue3.innerText = this.value">
+                                <p id="rangeValue3">0</p>
+                            </div>
+                        </div>
                     </div>
                     <br/>
-                    <div class="range">
-                        <label for="speechiness">Speechiness:</label>
-                        <input @bind="TrackRequest.Speechiness" type="range" min="0" max="100" id="speechiness" name="speechiness" oninput="rangeValue2.innerText = this.value">
-                        <p id="rangeValue2">0</p>
+                    <div class="col-auto">
+                        <input type="submit" value="Submit" class="btn btn-primary">
                     </div>
-                    <br/>
-                    <div class="range">
-                        <label for="valence">Valence:</label>
-                        <input @bind="TrackRequest.Valence" type="range" min="0" max="100" id="valence" name="valence" oninput="rangeValue3.innerText = this.value">
-                        <p id="rangeValue3">0</p>
-                    </div>
-                </div>
-                <br/>
-                <div class="col-auto">
-                    <input type="submit" value="Submit" class="btn btn-primary">
                 </div>
             </EditForm>
             <br/>
