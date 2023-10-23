@@ -2,7 +2,7 @@
 @using SpotifyAPI.Web
 @using SpotifyBlazor.Controllers
 @using SpotifyBlazor.Data
-@using SpotifyBlazor.Models
+@using TrackRequest = SpotifyBlazor.Models.TrackRequest
 @inject NavigationManager navManager
 
 @* UI to show mixing desk with sliders of parameters to meet e.g. instrumentalness, tempo etc
@@ -71,19 +71,24 @@ App will get all users songs and generate playlist meeting parameters
 
             <p>@SpotifyClientController.IsPlaying</p>
 
-            <EditForm Model="_trackRequirements" OnValidSubmit="@(() => TrackService.GetAudioFeatures(_spotify, _selectedPlaylist))">
+            <EditForm Model="_trackRequest" OnValidSubmit="@(() => TrackService.GetAudioFeatures(_spotify, _selectedPlaylist))">
                 <div class="row gy-2 gx-3 align-items-center">
-                    <div class="col-auto">
-                        <label for="instrumentalness" class="form-label">Instrumentalness:</label>
-                        <input @bind="TrackRequirements.Instrumentalness" type="number" step="0.01" id="instrumentalness" class="form-control" name="instrumentalness">
+                    <div class="range">
+                        <label for="instrumentalness">Instrumentalness:</label>
+                        <input @bind="TrackRequest.Instrumentalness" type="range" min="0" max="100" id="instrumentalness" name="instrumentalness" oninput="rangeValue1.innerText = this.value">
+                        <p id="rangeValue1">0</p>
                     </div>
-                    <div class="col-auto">
-                        <label for="speechiness" class="form-label">Speechiness:</label>
-                        <input @bind="TrackRequirements.Speechiness" type="number" step="0.01" id="speechiness" class="form-control" name="speechiness">
+                    <br/>
+                    <div class="range">
+                        <label for="speechiness">Speechiness:</label>
+                        <input @bind="TrackRequest.Speechiness" type="range" min="0" max="100" id="speechiness" name="speechiness" oninput="rangeValue2.innerText = this.value">
+                        <p id="rangeValue2">0</p>
                     </div>
-                    <div class="col-auto">
-                        <label for="valence" class="form-label">Valence:</label>
-                        <input @bind="TrackRequirements.Valence" type="number" step="0.01" id="valence" class="form-control" name="valence">
+                    <br/>
+                    <div class="range">
+                        <label for="valence">Valence:</label>
+                        <input @bind="TrackRequest.Valence" type="range" min="0" max="100" id="valence" name="valence" oninput="rangeValue3.innerText = this.value">
+                        <p id="rangeValue3">0</p>
                     </div>
                 </div>
                 <br/>
@@ -152,7 +157,7 @@ else
 
     private bool _isPlaying;
 
-    private readonly TrackRequirements _trackRequirements = new();
+    private readonly TrackRequest _trackRequest = new();
 
     protected override void OnInitialized()
     {

@@ -1,5 +1,6 @@
 ﻿using SpotifyAPI.Web;
 using SpotifyBlazor.Models;
+using TrackRequest = SpotifyBlazor.Models.TrackRequest;
 
 namespace SpotifyBlazor.Data;
 
@@ -7,36 +8,47 @@ public class TrackService
 {
     public static List<Track>? MatchingTracks;
 
-    public static void GetAudioFeatures(SpotifyClient spotify, SimplePlaylist selectedPlaylist)
+    public static async Task GetAudioFeatures(SpotifyClient spotify, SimplePlaylist selectedPlaylist)
     {
         MatchingTracks = null;
 
-        foreach (var item in spotify.Playlists.Get(selectedPlaylist.Id).Result.Tracks?.Items)
+        var playlistItems =  spotify.Playlists.Get(selectedPlaylist.Id).Result.Tracks?.Items;
+        
+        var basicTracks = playlistItems
+            .Where(p => p.Track is FullTrack)
+            .Select(t => t.Track as FullTrack)
+            .ToList();
+        
+        var trackIds = basicTracks.Select(t => t.Id).ToList();
+        
+        var audioFeatures = await spotify.Tracks.GetSeveralAudioFeatures(new TracksAudioFeaturesRequest(trackIds));
+        
+        Console.WriteLine(audioFeatures);
+
+        for (int i = 0; i < audioFeatures.AudioFeatures.Count; i++)
         {
-            if (item.Track is not FullTrack track) continue;
-
-            var trackAudioFeatures = spotify.Tracks.GetAudioFeatures(track.Id).Result;
-
-            var instrumentalnessRange = GetRange(0.1, trackAudioFeatures.Instrumentalness, TrackRequirements.Instrumentalness);
-            var speechinessRange = GetRange(0.1, trackAudioFeatures.Speechiness, TrackRequirements.Speechiness);
-            var valenceRange = GetRange(0.1, trackAudioFeatures.Valence, TrackRequirements.Valence);
+            var track = audioFeatures.AudioFeatures[i];
+            
+            var instrumentalnessRange = GetRange(0.1, track.Instrumentalness, (float)(TrackRequest.Instrumentalness * 0.01));
+            var speechinessRange = GetRange(0.1, track.Speechiness, (float)(TrackRequest.Speechiness * 0.01));
+            var valenceRange = GetRange(0.1, track.Valence, (float)(TrackRequest.Valence * 0.01));
 
             if (instrumentalnessRange && speechinessRange && valenceRange)
             {
-                Console.WriteLine(track.Name + " Instrumentalness:" + trackAudioFeatures.Instrumentalness +
-                                  " Speechiness:" + trackAudioFeatures.Speechiness + " Valence:" +
-                                  trackAudioFeatures.Valence);
-
+                Console.WriteLine(track + " Instrumentalness:" + track.Instrumentalness +
+                                  " Speechiness:" + track.Speechiness + " Valence:" +
+                                  track.Valence);
+                
                 if (MatchingTracks is null)
                 {
                     MatchingTracks = new List<Track>
                     {
                         new()
                         {
-                            Name = track.Name,
-                            Instrumentalness = trackAudioFeatures.Instrumentalness,
-                            Speechiness = trackAudioFeatures.Speechiness,
-                            Valence = trackAudioFeatures.Valence
+                            Name = basicTracks[i].Name,
+                            Instrumentalness = track.Instrumentalness,
+                            Speechiness = track.Speechiness,
+                            Valence = track.Valence
                         }
                     };
                 }
@@ -44,10 +56,10 @@ public class TrackService
                 {
                     MatchingTracks.Add(new Track
                     {
-                        Name = track.Name,
-                        Instrumentalness = trackAudioFeatures.Instrumentalness,
-                        Speechiness = trackAudioFeatures.Speechiness,
-                        Valence = trackAudioFeatures.Valence
+                        Name = basicTracks[i].Name,
+                        Instrumentalness = track.Instrumentalness,
+                        Speechiness = track.Speechiness,
+                        Valence = track.Valence
                     });
                 }
             }
