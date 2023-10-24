@@ -1,3 +1,4 @@
+using SpotifyBlazor.Controllers;
 using SpotifyBlazor.Data;
 
 var builder = WebApplication.CreateBuilder(args);

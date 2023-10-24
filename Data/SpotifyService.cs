@@ -1,26 +1,30 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Http.HttpResults;
-using SpotifyAPI.Web;
+﻿using SpotifyAPI.Web;
 
 namespace SpotifyBlazor.Data;
 
 public class SpotifyService
 {
+    private static IConfiguration _secrets;
+
+    public SpotifyService()
+    {
+        _secrets = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("secrets.json")
+            .Build();
+    }
+    
     public async Task<Uri> GetUser()
     {
-        // Make sure "http://localhost:5543" is in your applications redirect URIs!
         var loginRequest = new LoginRequest(
             new Uri("http://localhost:5543"),
-            "716a29344d854ebcbdbe2ea5394848d4",
+            _secrets["spotify_client_id"],
             LoginRequest.ResponseType.Token
         )
         {
             Scope = new[] { Scopes.PlaylistReadPrivate, Scopes.PlaylistReadCollaborative }
         };
         return loginRequest.ToUri();
-        
-// Redirect user to uri via your favorite web-server
     }
     
     public async Task GetUserPlaylists(SpotifyClient spotify)
@@ -47,7 +51,7 @@ public class SpotifyService
         var config = SpotifyClientConfig.CreateDefault();
 
         var request =
-            new ClientCredentialsRequest("716a29344d854ebcbdbe2ea5394848d4", "9ecde9816d9c4a578d6b0c34b8910e4f");
+            new ClientCredentialsRequest(_secrets["spotify_client_id"], _secrets["spotify_client_secret"]);
         var response = await new OAuthClient(config).RequestToken(request);
 
         var spotify = new SpotifyClient(config.WithToken(response.AccessToken));
