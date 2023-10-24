@@ -34,7 +34,7 @@ public class TrackService
 
             if (instrumentalnessRange && speechinessRange && valenceRange)
             {
-                Console.WriteLine(track + " Instrumentalness:" + track.Instrumentalness +
+                Console.WriteLine(basicTracks[i].Name + " Instrumentalness:" + track.Instrumentalness +
                                   " Speechiness:" + track.Speechiness + " Valence:" +
                                   track.Valence);
                 

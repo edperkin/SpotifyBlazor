@@ -76,25 +76,28 @@ App will get all users songs and generate playlist meeting parameters
                     <div class="row">
                         <div class="col-sm">
                             <div class="range">
-                                <label for="instrumentalness">Instrumentalness:</label>
                                 <input @bind="TrackRequest.Instrumentalness" type="range" min="0" max="100" id="instrumentalness" name="instrumentalness" oninput="rangeValue1.innerText = this.value">
                                 <p id="rangeValue1">0</p>
+                                <br/>
+                                <label for="instrumentalness">Instrumentalness</label>
                             </div>
                         </div>
                         <br/>
                         <div class="col-sm">
                             <div class="range">
-                                <label for="speechiness">Speechiness:</label>
                                 <input @bind="TrackRequest.Speechiness" type="range" min="0" max="100" id="speechiness" name="speechiness" oninput="rangeValue2.innerText = this.value">
                                 <p id="rangeValue2">0</p>
+                                <br/>
+                                <label for="speechiness">Speechiness</label>
                             </div>
                         </div>
                         <br/>
                         <div class="col-sm">
                             <div class="range">
-                                <label for="valence">Valence:</label>
                                 <input @bind="TrackRequest.Valence" type="range" min="0" max="100" id="valence" name="valence" oninput="rangeValue3.innerText = this.value">
                                 <p id="rangeValue3">0</p>
+                                <br/>
+                                <label for="valence">Valence</label>
                             </div>
                         </div>
                     </div>
@@ -142,6 +145,7 @@ else
 }
 
 @code {
+    private static IConfiguration _secrets;
 
     private Uri _authUri;
 
@@ -166,13 +170,18 @@ else
     private bool _isPlaying;
 
     private readonly TrackRequest _trackRequest = new();
+    
 
     protected override void OnInitialized()
     {
-        var clientId = "716a29344d854ebcbdbe2ea5394848d4";
+        _secrets = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("secrets.json")
+            .Build();
+        
         var baseUri = navManager.ToAbsoluteUri(navManager.BaseUri);
 
-        var loginRequest = new LoginRequest(baseUri, clientId, LoginRequest.ResponseType.Token)
+        var loginRequest = new LoginRequest(baseUri, _secrets["spotify_client_id"], LoginRequest.ResponseType.Token)
         {
             Scope = new[] { Scopes.PlaylistReadPrivate, Scopes.PlaylistReadCollaborative, Scopes.AppRemoteControl, Scopes.Streaming, Scopes.UserModifyPlaybackState, Scopes.UserReadCurrentlyPlaying, Scopes.UserReadPlaybackState }
         };
