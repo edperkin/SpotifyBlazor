@@ -6,4 +6,5 @@ public class Track
     public float Instrumentalness { get; set; }
     public float Speechiness { get; set; }
     public float Valence { get; set; }
+    public float Acousticness { get; set; }
 }

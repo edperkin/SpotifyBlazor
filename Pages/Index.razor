@@ -71,13 +71,29 @@ App will get all users songs and generate playlist meeting parameters
 
             <p>@SpotifyClientController.IsPlaying</p>
 
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm">
+                        <input type='checkbox' id='check-instrumentalness' class="form-check-input" onchange='check("check-instrumentalness", "instrumentalness")'/>
+                    </div>
+                    <div class="col-sm">
+                        <input type='checkbox' id='check-speechiness' class="form-check-input" onchange='check("check-speechiness", "speechiness")'/>
+                    </div>
+                    <div class="col-sm">
+                        <input type='checkbox' id='check-valence' class="form-check-input" onchange='check("check-valence", "valence")'/>
+                    </div>
+                    <div class="col-sm">
+                        <input type='checkbox' id='check-acousticness' class="form-check-input" onchange='check("check-acousticness", "acousticness")'/>
+                    </div>
+                </div>
+            </div>
             <EditForm Model="_trackRequest" OnValidSubmit="@(() => TrackService.GetAudioFeatures(_spotify, _selectedPlaylist))">
                 <div class="container">
                     <div class="row">
                         <div class="col-sm">
                             <div class="range">
-                                <input @bind="TrackRequest.Instrumentalness" type="range" min="0" max="100" id="instrumentalness" name="instrumentalness" oninput="rangeValue1.innerText = this.value">
-                                <p id="rangeValue1">0</p>
+                                <input @bind="TrackRequest.Instrumentalness" type="range" min="0" max="100" id="instrumentalness" name="instrumentalness" disabled oninput="rangeValue1.innerText = this.value">
+                                <p id="rangeValue1">50</p><p>%</p>
                                 <br/>
                                 <label for="instrumentalness">Instrumentalness</label>
                             </div>
@@ -85,8 +101,8 @@ App will get all users songs and generate playlist meeting parameters
                         <br/>
                         <div class="col-sm">
                             <div class="range">
-                                <input @bind="TrackRequest.Speechiness" type="range" min="0" max="100" id="speechiness" name="speechiness" oninput="rangeValue2.innerText = this.value">
-                                <p id="rangeValue2">0</p>
+                                <input @bind="TrackRequest.Speechiness" type="range" min="0" max="100" id="speechiness" name="speechiness" disabled oninput="rangeValue2.innerText = this.value">
+                                <p id="rangeValue2">50</p><p>%</p>
                                 <br/>
                                 <label for="speechiness">Speechiness</label>
                             </div>
@@ -94,10 +110,18 @@ App will get all users songs and generate playlist meeting parameters
                         <br/>
                         <div class="col-sm">
                             <div class="range">
-                                <input @bind="TrackRequest.Valence" type="range" min="0" max="100" id="valence" name="valence" oninput="rangeValue3.innerText = this.value">
-                                <p id="rangeValue3">0</p>
+                                <input @bind="TrackRequest.Valence" type="range" min="0" max="100" id="valence" name="valence" disabled oninput="rangeValue3.innerText = this.value">
+                                <p id="rangeValue3">50</p><p>%</p>
                                 <br/>
                                 <label for="valence">Valence</label>
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="range">
+                                <input @bind="TrackRequest.Acousticness" type="range" min="0" max="100" id="acousticness" name="acousticness" disabled oninput="rangeValue4.innerText = this.value">
+                                <p id="rangeValue4">50</p><p>%</p>
+                                <br/>
+                                <label for="acousticness">Acousticness</label>
                             </div>
                         </div>
                     </div>
@@ -118,6 +142,7 @@ App will get all users songs and generate playlist meeting parameters
                         <th scope="col">Instrumentalness</th>
                         <th scope="col">Speechiness</th>
                         <th scope="col">Valence</th>
+                        <th scope="col">Acousticness</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -128,6 +153,7 @@ App will get all users songs and generate playlist meeting parameters
                             <td>@track.Instrumentalness</td>
                             <td>@track.Speechiness</td>
                             <td>@track.Valence</td>
+                            <td>@track.Acousticness</td>
                         </tr>
                     }
                     </tbody>
@@ -170,7 +196,7 @@ else
     private bool _isPlaying;
 
     private readonly TrackRequest _trackRequest = new();
-    
+
 
     protected override void OnInitialized()
     {
@@ -178,7 +204,7 @@ else
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("secrets.json")
             .Build();
-        
+
         var baseUri = navManager.ToAbsoluteUri(navManager.BaseUri);
 
         var loginRequest = new LoginRequest(baseUri, _secrets["spotify_client_id"], LoginRequest.ResponseType.Token)

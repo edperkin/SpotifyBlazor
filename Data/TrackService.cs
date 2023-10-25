@@ -11,33 +11,23 @@ public class TrackService
     {
         MatchingTracks = null;
 
-        var playlistItems =  spotify.Playlists.Get(selectedPlaylist.Id).Result.Tracks?.Items;
-        
+        var playlistItems = spotify.Playlists.Get(selectedPlaylist.Id).Result.Tracks?.Items;
+
         var basicTracks = playlistItems
             .Where(p => p.Track is FullTrack)
             .Select(t => t.Track as FullTrack)
             .ToList();
-        
+
         var trackIds = basicTracks.Select(t => t.Id).ToList();
-        
-        var audioFeatures = await spotify.Tracks.GetSeveralAudioFeatures(new TracksAudioFeaturesRequest(trackIds));
-        
-        Console.WriteLine(audioFeatures);
 
-        for (int i = 0; i < audioFeatures.AudioFeatures.Count; i++)
+        var trackAudioFeaturesList = spotify.Tracks.GetSeveralAudioFeatures(new TracksAudioFeaturesRequest(trackIds)).Result.AudioFeatures;
+        
+        for (var i = 0; i < trackAudioFeaturesList.Count; i++)
         {
-            var track = audioFeatures.AudioFeatures[i];
-            
-            var instrumentalnessRange = GetRange(0.1, track.Instrumentalness, (float)(TrackRequest.Instrumentalness * 0.01));
-            var speechinessRange = GetRange(0.1, track.Speechiness, (float)(TrackRequest.Speechiness * 0.01));
-            var valenceRange = GetRange(0.1, track.Valence, (float)(TrackRequest.Valence * 0.01));
-
-            if (instrumentalnessRange && speechinessRange && valenceRange)
+            if (TrackFeaturesInRange(trackAudioFeaturesList[i]))
             {
-                Console.WriteLine(basicTracks[i].Name + " Instrumentalness:" + track.Instrumentalness +
-                                  " Speechiness:" + track.Speechiness + " Valence:" +
-                                  track.Valence);
-                
+                Console.WriteLine(basicTracks[i].Name);
+
                 if (MatchingTracks is null)
                 {
                     MatchingTracks = new List<Track>
@@ -45,9 +35,10 @@ public class TrackService
                         new()
                         {
                             Name = basicTracks[i].Name,
-                            Instrumentalness = track.Instrumentalness,
-                            Speechiness = track.Speechiness,
-                            Valence = track.Valence
+                            Instrumentalness = trackAudioFeaturesList[i].Instrumentalness,
+                            Speechiness = trackAudioFeaturesList[i].Speechiness,
+                            Valence = trackAudioFeaturesList[i].Valence,
+                            Acousticness = trackAudioFeaturesList[i].Acousticness
                         }
                     };
                 }
@@ -56,19 +47,42 @@ public class TrackService
                     MatchingTracks.Add(new Track
                     {
                         Name = basicTracks[i].Name,
-                        Instrumentalness = track.Instrumentalness,
-                        Speechiness = track.Speechiness,
-                        Valence = track.Valence
+                        Instrumentalness = trackAudioFeaturesList[i].Instrumentalness,
+                        Speechiness = trackAudioFeaturesList[i].Speechiness,
+                        Valence = trackAudioFeaturesList[i].Valence,
+                        Acousticness = trackAudioFeaturesList[i].Acousticness
                     });
                 }
             }
         }
 
         Console.WriteLine("Submitted");
+
+        TrackRequest.Instrumentalness = null;
+        TrackRequest.Speechiness = null;
+        TrackRequest.Valence = null;
+        TrackRequest.Acousticness = null;
+    }
+    
+    private static bool CheckFeatures(float? trackRequestFeature, float trackAudioFeature)
+    {
+        return trackRequestFeature is null || IsFeatureInRange(0.1, trackAudioFeature, trackRequestFeature.Value * 0.01f);
     }
 
-    private static bool GetRange(double range, float audioFeature, float requirement)
+    private static bool IsFeatureInRange(double range, float audioFeature, double request)
     {
-        return requirement >= audioFeature - range && requirement <= audioFeature + range;
+        var lowRange = audioFeature - range;
+        var highRange = audioFeature + range;
+        return request >= lowRange && request <= highRange;
+    }
+
+    private static bool TrackFeaturesInRange(TrackAudioFeatures track)
+    {
+        var isInInstrumentalnessRange = CheckFeatures(TrackRequest.Instrumentalness, track.Instrumentalness);
+        var isInSpeechinessRange = CheckFeatures(TrackRequest.Speechiness, track.Speechiness);
+        var isInValenceRange = CheckFeatures(TrackRequest.Valence, track.Valence);
+        var isInAcousticnessRange = CheckFeatures(TrackRequest.Acousticness, track.Acousticness);
+
+        return isInInstrumentalnessRange & isInSpeechinessRange & isInValenceRange & isInAcousticnessRange;
     }
 }
