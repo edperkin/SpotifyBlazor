@@ -35,6 +35,7 @@ public class TrackService
                         new()
                         {
                             Name = basicTracks[i].Name,
+                            Uri = basicTracks[i].Uri,
                             Instrumentalness = trackAudioFeaturesList[i].Instrumentalness,
                             Speechiness = trackAudioFeaturesList[i].Speechiness,
                             Valence = trackAudioFeaturesList[i].Valence,
@@ -47,6 +48,7 @@ public class TrackService
                     MatchingTracks.Add(new Track
                     {
                         Name = basicTracks[i].Name,
+                        Uri = basicTracks[i].Uri,
                         Instrumentalness = trackAudioFeaturesList[i].Instrumentalness,
                         Speechiness = trackAudioFeaturesList[i].Speechiness,
                         Valence = trackAudioFeaturesList[i].Valence,
