@@ -16,19 +16,27 @@ App will get all users songs and generate playlist meeting parameters
     @if (!SpotifyClientController.ActiveDevice)
     {
         <h2>Welcome @_me.DisplayName!</h2>
-        <p>
-            Please select a device:
-            <div>
-                <ul>
-                    @foreach (var device in _devicesList)
-                    {
-                        <button id=@device.Name>
-                            <a @onclick="() => SpotifyClientController.ChooseDevice(_spotify, device)">@device.Name</a>
-                        </button>
-                    }
-                </ul>
-            </div>
-        </p>
+        if (_devicesList.Count == 0)
+        {
+            <p>Please open the spotify app on a device then refresh page</p>
+        }
+        else
+        {
+
+            <p>
+                Please select a device:
+                <div>
+                    <ul>
+                        @foreach (var device in _devicesList)
+                        {
+                            <button id=@device.Name>
+                                <a @onclick="() => SpotifyClientController.ChooseDevice(_spotify, device)">@device.Name</a>
+                            </button>
+                        }
+                    </ul>
+                </div>
+            </p>
+        }
     }
     else
     {
