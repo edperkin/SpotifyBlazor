@@ -93,7 +93,8 @@ App will get all users songs and generate playlist meeting parameters
                         <div class="col-sm">
                             <div class="range">
                                 <input @bind="TrackRequest.Instrumentalness" type="range" min="0" max="100" id="instrumentalness" name="instrumentalness" disabled oninput="rangeValue1.innerText = this.value">
-                                <p id="rangeValue1">50</p><p>%</p>
+                                <p id="rangeValue1">50</p>
+                                <p>%</p>
                                 <br/>
                                 <label for="instrumentalness">Instrumentalness</label>
                             </div>
@@ -102,7 +103,8 @@ App will get all users songs and generate playlist meeting parameters
                         <div class="col-sm">
                             <div class="range">
                                 <input @bind="TrackRequest.Speechiness" type="range" min="0" max="100" id="speechiness" name="speechiness" disabled oninput="rangeValue2.innerText = this.value">
-                                <p id="rangeValue2">50</p><p>%</p>
+                                <p id="rangeValue2">50</p>
+                                <p>%</p>
                                 <br/>
                                 <label for="speechiness">Speechiness</label>
                             </div>
@@ -111,7 +113,8 @@ App will get all users songs and generate playlist meeting parameters
                         <div class="col-sm">
                             <div class="range">
                                 <input @bind="TrackRequest.Valence" type="range" min="0" max="100" id="valence" name="valence" disabled oninput="rangeValue3.innerText = this.value">
-                                <p id="rangeValue3">50</p><p>%</p>
+                                <p id="rangeValue3">50</p>
+                                <p>%</p>
                                 <br/>
                                 <label for="valence">Valence</label>
                             </div>
@@ -119,7 +122,8 @@ App will get all users songs and generate playlist meeting parameters
                         <div class="col-sm">
                             <div class="range">
                                 <input @bind="TrackRequest.Acousticness" type="range" min="0" max="100" id="acousticness" name="acousticness" disabled oninput="rangeValue4.innerText = this.value">
-                                <p id="rangeValue4">50</p><p>%</p>
+                                <p id="rangeValue4">50</p>
+                                <p>%</p>
                                 <br/>
                                 <label for="acousticness">Acousticness</label>
                             </div>
@@ -133,6 +137,8 @@ App will get all users songs and generate playlist meeting parameters
             </EditForm>
             <br/>
 
+            <button @onclick="CreatePlaylist">Create Playlist</button>
+            
             if (TrackService.MatchingTracks is not null)
             {
                 <table class="table">
@@ -197,7 +203,6 @@ else
 
     private readonly TrackRequest _trackRequest = new();
 
-
     protected override void OnInitialized()
     {
         _secrets = new ConfigurationBuilder()
@@ -209,7 +214,18 @@ else
 
         var loginRequest = new LoginRequest(baseUri, _secrets["spotify_client_id"], LoginRequest.ResponseType.Token)
         {
-            Scope = new[] { Scopes.PlaylistReadPrivate, Scopes.PlaylistReadCollaborative, Scopes.AppRemoteControl, Scopes.Streaming, Scopes.UserModifyPlaybackState, Scopes.UserReadCurrentlyPlaying, Scopes.UserReadPlaybackState }
+            Scope = new[]
+            {
+                Scopes.PlaylistReadPrivate,
+                Scopes.PlaylistReadCollaborative,
+                Scopes.AppRemoteControl,
+                Scopes.Streaming,
+                Scopes.UserModifyPlaybackState,
+                Scopes.UserReadCurrentlyPlaying,
+                Scopes.UserReadPlaybackState,
+                Scopes.PlaylistModifyPrivate,
+                Scopes.PlaylistModifyPublic
+            }
         };
         _authUri = loginRequest.ToUri();
     }
@@ -249,4 +265,10 @@ else
         TrackService.MatchingTracks = null;
     }
 
+    private async Task CreatePlaylist()
+    {
+        var playlist = await _spotify.Playlists.Create(_me.Id, new PlaylistCreateRequest("Edify Playlist"));
+        await _spotify.Playlists.AddItems(playlist.Id, new PlaylistAddItemsRequest(uris: TrackService.MatchingTracks.Select(t => t.Uri).ToList()));
+        Console.WriteLine("Playlist Created");
+    }
 }
