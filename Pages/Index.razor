@@ -265,10 +265,10 @@ else
         TrackService.MatchingTracks = null;
     }
 
-    private void CreatePlaylist()
+    private async Task CreatePlaylist()
     {
-        var playlist = _spotify.Playlists.Create(_me.Id, new PlaylistCreateRequest("playlist"));
-        // _spotify.Playlists.AddItems(playlist.Id.ToString(), new PlaylistAddItemsRequest(uris: TrackService.MatchingTracks.Select(t => t.Uri).ToList()));
-        Console.WriteLine("playlist made");
+        var playlist = await _spotify.Playlists.Create(_me.Id, new PlaylistCreateRequest("Edify Playlist"));
+        await _spotify.Playlists.AddItems(playlist.Id, new PlaylistAddItemsRequest(uris: TrackService.MatchingTracks.Select(t => t.Uri).ToList()));
+        Console.WriteLine("Playlist Created");
     }
 }
