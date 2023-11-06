@@ -11,8 +11,8 @@ public static class TrackService
     {
         MatchingTracks = null;
 
-        const int limit = 100; 
-        const int offset = 0; 
+        const int limit = 100;
+        const int offset = 0;
         var basicTracks = new List<FullTrack>();
         var request = new PlaylistGetItemsRequest { Limit = limit, Offset = offset };
 
@@ -55,8 +55,11 @@ public static class TrackService
         TrackRequest.Acousticness = null;
     }
 
-    private static void AddMatchingTracksToTrackList(IReadOnlyList<TrackAudioFeatures>? trackAudioFeaturesList,  IReadOnlyList<FullTrack>? basicTracks)
+    private static void AddMatchingTracksToTrackList(IReadOnlyList<TrackAudioFeatures>? trackAudioFeaturesList,
+        IReadOnlyList<FullTrack>? basicTracks)
     {
+        // MatchingTracks = basicTracks.Select()
+
         for (var i = 0; i < trackAudioFeaturesList.Count; i++)
         {
             if (TrackFeaturesInRange(trackAudioFeaturesList[i]))
