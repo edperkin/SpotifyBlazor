@@ -15,27 +15,31 @@ App will get all users songs and generate playlist meeting parameters
 {
     @if (!SpotifyClientController.ActiveDevice)
     {
-        <h2>Welcome @_me.DisplayName!</h2>
-        if (_devicesList.Count == 0)
-        {
-            <p>Please open the spotify app on a device then refresh page</p>
-        }
-        else
-        {
-            <p>
-                Please select a device:
-                <div>
-                    <ul>
-                        @foreach (var device in _devicesList)
-                        {
-                            <button id=@device.Name>
-                                <a @onclick="() => SpotifyClientController.ChooseDevice(_spotify, device)">@device.Name</a>
-                            </button>
-                        }
-                    </ul>
-                </div>
-            </p>
-        }
+        <h2 class="text-center my-4">Welcome @_me.DisplayName!</h2>
+        <div class="d-flex flex-column min-vh-100">
+            <div class="d-flex flex-grow-1 justify-content-center">
+                @if (_devicesList.Count == 0)
+                {
+                    <p>Please open the spotify app on a device then refresh page</p>
+                }
+                else
+                {
+                    <p>
+                        Please select a device:
+                        <div>
+                            <ul>
+                                @foreach (var device in _devicesList)
+                                {
+                                    <button id=@device.Name>
+                                        <a @onclick="() => SpotifyClientController.ChooseDevice(_spotify, device)">@device.Name</a>
+                                    </button>
+                                }
+                            </ul>
+                        </div>
+                    </p>
+                }
+            </div>
+        </div>
     }
     else
     {
@@ -81,64 +85,59 @@ App will get all users songs and generate playlist meeting parameters
             <EditForm Model="_trackRequest" OnValidSubmit="@(() => TrackService.GetAudioFeatures(_spotify, _selectedPlaylist))">
                 <div class="container">
                     <div class="row">
-                        <div class="col-sm">
+                        <div class="col">
                             <div class="range">
                                 <p id="rangeValue1" class="slider-label-value">50</p>
                                 <input @bind="TrackRequest.Instrumentalness" type="range" min="0" max="100" id="instrumentalness" name="instrumentalness" disabled oninput="rangeValue1.innerText = this.value">
                             </div>
+                            <div>
+                                <label class="check-label" id='instrumentalness_label' onChange="myFunction(instrumentalness_label, 'check-instrumentalness')";>
+                                    <input type='checkbox' id='check-instrumentalness' class="form-check-input" onchange='check("check-instrumentalness", "instrumentalness")' hidden/>Instrumentalness
+                                </label>
+                            </div>
                         </div>
                         <br/>
-                        <div class="col-sm">
+                        <div class="col">
                             <div class="range">
                                 <p id="rangeValue2" class="slider-label-value">50</p>
                                 <input @bind="TrackRequest.Speechiness" type="range" min="0" max="100" id="speechiness" name="speechiness" disabled oninput="rangeValue2.innerText = this.value">
                             </div>
+                            <div>
+                                <label class="check-label" id='speechiness_label' onChange="myFunction(speechiness_label, 'check-speechiness')";>
+                                    <input type='checkbox' id='check-speechiness' class="form-check-input" onchange='check("check-speechiness", "speechiness")' hidden/>Speechiness
+                                </label>
+                            </div>
                         </div>
                         <br/>
-                        <div class="col-sm">
+                        <div class="col">
                             <div class="range">
                                 <p id="rangeValue3" class="slider-label-value">50</p>
                                 <input @bind="TrackRequest.Valence" type="range" min="0" max="100" id="valence" name="valence" disabled oninput="rangeValue3.innerText = this.value">
                             </div>
+                            <div>
+                                <label class="check-label" id='valence_label' onChange="myFunction(valence_label, 'check-valence')";>
+                                    <input type='checkbox' id='check-valence' class="form-check-input" onchange='check("check-valence", "valence")' hidden/>Valence
+                                </label>
+                            </div>
                         </div>
-                        <div class="col-sm">
+                        <div class="col">
                             <div class="range">
                                 <p id="rangeValue4" class="slider-label-value">50</p>
                                 <input @bind="TrackRequest.Acousticness" type="range" min="0" max="100" id="acousticness" name="acousticness" disabled oninput="rangeValue4.innerText = this.value">
                             </div>
+                            <div>
+                                <label class="check-label" id='acousticness_label' onChange="myFunction(acousticness_label, 'check-acousticness')";>
+                                    <input type='checkbox' id='check-acousticness' class="form-check-input" onchange='check("check-acousticness", "acousticness")' hidden/>Acousticness
+                                </label>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-sm">
+                    <br/>
+                    <div class="col">
                         <input type="submit" value="Submit" class="btn btn-primary">
                     </div>
                 </div>
             </EditForm>
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm">
-                        <div>
-                            <label class="check-label" id='instrumentalness_label' onChange="myFunction(instrumentalness_label, 'check-instrumentalness')";>
-                                <input type='checkbox' id='check-instrumentalness' class="form-check-input" onchange='check("check-instrumentalness", "instrumentalness")' hidden/>Instrumentalness
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-sm">
-                        <label class="check-label" id='speechiness_label' onChange="myFunction(speechiness_label, 'check-speechiness')";>
-                            <input type='checkbox' id='check-speechiness' class="form-check-input" onchange='check("check-speechiness", "speechiness")' hidden/>Speechiness
-                        </label>
-                    </div>
-                    <div class="col-sm">
-                        <label class="check-label" id='valence_label' onChange="myFunction(valence_label, 'check-valence')";>
-                            <input type='checkbox' id='check-valence' class="form-check-input" onchange='check("check-valence", "valence")' hidden/>Valence
-                        </label>
-                    </div>
-                    <div class="col-sm">
-                        <label class="check-label" id='acousticness_label' onChange="myFunction(acousticness_label, 'check-acousticness')";>
-                            <input type='checkbox' id='check-acousticness' class="form-check-input" onchange='check("check-acousticness", "acousticness")' hidden/>Acousticness
-                        </label>
-                    </div>
-                </div>
-            </div>
             <br/>
             <button @onclick="CreatePlaylist">Create Playlist</button>
 
@@ -274,5 +273,4 @@ else
         await _spotify.Playlists.AddItems(playlist.Id, new PlaylistAddItemsRequest(uris: TrackService.MatchingTracks.Select(t => t.Uri).ToList()));
         Console.WriteLine("Playlist Created");
     }
-
 }
