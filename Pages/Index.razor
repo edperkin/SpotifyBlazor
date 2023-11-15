@@ -82,8 +82,8 @@ App will get all users songs and generate playlist meeting parameters
 
             <p>@SpotifyClientController.IsPlaying</p>
 
-            <EditForm Model="_trackRequest" OnValidSubmit="@(() => TrackService.GetAudioFeatures(_spotify, _selectedPlaylist))">
-                <div class="container">
+            <div class="container">
+                <EditForm Model="_trackRequest" OnValidSubmit="@(() => TrackService.GetAudioFeatures(_spotify, _selectedPlaylist))">
                     <div class="row">
                         <div class="col">
                             <div class="range">
@@ -91,8 +91,9 @@ App will get all users songs and generate playlist meeting parameters
                                 <input @bind="TrackRequest.Instrumentalness" type="range" min="0" max="100" id="instrumentalness" name="instrumentalness" disabled oninput="rangeValue1.innerText = this.value">
                             </div>
                             <div>
-                                <label class="check-label" id='instrumentalness_label' onChange="myFunction(instrumentalness_label, 'check-instrumentalness')";>
-                                    <input type='checkbox' id='check-instrumentalness' class="form-check-input" onchange='check("check-instrumentalness", "instrumentalness")' hidden/>Instrumentalness
+                                <label class="check-label" id='instrumentalness_label' data-bs-toggle="tooltip" data-bs-placement="bottom" title="Tooltip on bottom" onChange="myFunction(instrumentalness_label, 'check-instrumentalness')";>
+                                    <img src="icons/drum-solid.svg" alt="drum icon" class="svg-icon"/>
+                                    <input type='checkbox' id='check-instrumentalness' class="form-check-input" onchange='check("check-instrumentalness", "instrumentalness")' hidden/>
                                 </label>
                             </div>
                         </div>
@@ -104,7 +105,8 @@ App will get all users songs and generate playlist meeting parameters
                             </div>
                             <div>
                                 <label class="check-label" id='speechiness_label' onChange="myFunction(speechiness_label, 'check-speechiness')";>
-                                    <input type='checkbox' id='check-speechiness' class="form-check-input" onchange='check("check-speechiness", "speechiness")' hidden/>Speechiness
+                                    <img src="icons/microphone-solid.svg" alt="drum icon" class="svg-icon"/>
+                                    <input type='checkbox' id='check-speechiness' class="form-check-input" onchange='check("check-speechiness", "speechiness")' hidden/>
                                 </label>
                             </div>
                         </div>
@@ -116,7 +118,8 @@ App will get all users songs and generate playlist meeting parameters
                             </div>
                             <div>
                                 <label class="check-label" id='valence_label' onChange="myFunction(valence_label, 'check-valence')";>
-                                    <input type='checkbox' id='check-valence' class="form-check-input" onchange='check("check-valence", "valence")' hidden/>Valence
+                                    <img src="icons/face-smile-solid.svg" alt="drum icon" class="svg-icon"/>
+                                    <input type='checkbox' id='check-valence' class="form-check-input" onchange='check("check-valence", "valence")' hidden/>
                                 </label>
                             </div>
                         </div>
@@ -127,7 +130,8 @@ App will get all users songs and generate playlist meeting parameters
                             </div>
                             <div>
                                 <label class="check-label" id='acousticness_label' onChange="myFunction(acousticness_label, 'check-acousticness')";>
-                                    <input type='checkbox' id='check-acousticness' class="form-check-input" onchange='check("check-acousticness", "acousticness")' hidden/>Acousticness
+                                    <img src="icons/guitar-solid.svg" alt="drum icon" class="svg-icon"/>
+                                    <input type='checkbox' id='check-acousticness' class="form-check-input" onchange='check("check-acousticness", "acousticness")' hidden/>
                                 </label>
                             </div>
                         </div>
@@ -136,37 +140,40 @@ App will get all users songs and generate playlist meeting parameters
                     <div class="col">
                         <input type="submit" value="Submit" class="btn btn-primary">
                     </div>
-                </div>
-            </EditForm>
+                </EditForm>
+                <br/>
+                <button @onclick="ClearResults">Clear Results</button>
+                <button @onclick="CreatePlaylist">Create Playlist</button>
+            </div>
             <br/>
-            <button @onclick="CreatePlaylist">Create Playlist</button>
-
-            if (TrackService.MatchingTracks is not null)
-            {
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Instrumentalness</th>
-                        <th scope="col">Speechiness</th>
-                        <th scope="col">Valence</th>
-                        <th scope="col">Acousticness</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var track in TrackService.MatchingTracks)
-                    {
+            <div class="container">
+                @if (TrackService.MatchingTracks is not null)
+                {
+                    <table class="table table-dark table-striped">
+                        <thead>
                         <tr>
-                            <td>@track.Name</td>
-                            <td>@track.Instrumentalness</td>
-                            <td>@track.Speechiness</td>
-                            <td>@track.Valence</td>
-                            <td>@track.Acousticness</td>
+                            <th scope="col">Name</th>
+                            <th scope="col">Instrumentalness</th>
+                            <th scope="col">Speechiness</th>
+                            <th scope="col">Valence</th>
+                            <th scope="col">Acousticness</th>
                         </tr>
-                    }
-                    </tbody>
-                </table>
-            }
+                        </thead>
+                        <tbody>
+                        @foreach (var track in TrackService.MatchingTracks)
+                        {
+                            <tr>
+                                <td>@track.Name</td>
+                                <td>@track.Instrumentalness%</td>
+                                <td>@track.Speechiness%</td>
+                                <td>@track.Valence%</td>
+                                <td>@track.Acousticness%</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+            </div>
         }
     }
 }
@@ -248,8 +255,34 @@ else
 
             _me = await _spotify.UserProfile.Current();
             _totalPlaylistCount = (await _spotify.Playlists.CurrentUsers()).Total;
-            _playlists = (await _spotify.Playlists.CurrentUsers()).Items;
+            // _playlists = (await _spotify.Playlists.CurrentUsers()).Items;
 
+            _playlists ??= new List<SimplePlaylist>();
+            const int limit = 50;
+            const int offset = 0;
+            var request = new PlaylistCurrentUsersRequest { Limit = limit, Offset = offset };
+            
+            while (true)
+            {
+                var response = await _spotify.Playlists.CurrentUsers(request);
+            
+                _playlists.AddRange(response.Items.Select(item => new SimplePlaylist
+                {
+                    Id = item.Id,
+                    Name = item.Name,
+                    Tracks = item.Tracks
+                }));
+            
+                if (!string.IsNullOrWhiteSpace(response.Next))
+                {
+                    request.Offset += limit;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            
             _devices = await _spotify.Player.GetAvailableDevices();
 
             _devicesList = _devices.Devices;
@@ -272,5 +305,10 @@ else
         var playlist = await _spotify.Playlists.Create(_me.Id, new PlaylistCreateRequest("Edify Playlist"));
         await _spotify.Playlists.AddItems(playlist.Id, new PlaylistAddItemsRequest(uris: TrackService.MatchingTracks.Select(t => t.Uri).ToList()));
         Console.WriteLine("Playlist Created");
+    }
+
+    private async Task ClearResults()
+    {
+        TrackService.MatchingTracks = null;
     }
 }
