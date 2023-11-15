@@ -74,10 +74,10 @@ public static class TrackService
                         {
                             Name = basicTracks[i].Name,
                             Uri = basicTracks[i].Uri,
-                            Instrumentalness = trackAudioFeaturesList[i].Instrumentalness,
-                            Speechiness = trackAudioFeaturesList[i].Speechiness,
-                            Valence = trackAudioFeaturesList[i].Valence,
-                            Acousticness = trackAudioFeaturesList[i].Acousticness
+                            Instrumentalness = trackAudioFeaturesList[i].Instrumentalness * 100,
+                            Speechiness = trackAudioFeaturesList[i].Speechiness * 100,
+                            Valence = trackAudioFeaturesList[i].Valence * 100,
+                            Acousticness = trackAudioFeaturesList[i].Acousticness * 100
                         }
                     };
                 }
@@ -87,10 +87,10 @@ public static class TrackService
                     {
                         Name = basicTracks[i].Name,
                         Uri = basicTracks[i].Uri,
-                        Instrumentalness = trackAudioFeaturesList[i].Instrumentalness,
-                        Speechiness = trackAudioFeaturesList[i].Speechiness,
-                        Valence = trackAudioFeaturesList[i].Valence,
-                        Acousticness = trackAudioFeaturesList[i].Acousticness
+                        Instrumentalness = trackAudioFeaturesList[i].Instrumentalness * 100,
+                        Speechiness = trackAudioFeaturesList[i].Speechiness * 100,
+                        Valence = trackAudioFeaturesList[i].Valence * 100,
+                        Acousticness = trackAudioFeaturesList[i].Acousticness * 100
                     });
                 }
             }
@@ -120,7 +120,7 @@ public static class TrackService
         return isInInstrumentalnessRange & isInSpeechinessRange & isInValenceRange & isInAcousticnessRange;
     }
 
-    private static IEnumerable<IEnumerable<T>> ChunkBy<T>(this IEnumerable<T> source, int chunkSize)
+    public static IEnumerable<IEnumerable<T>> ChunkBy<T>(this IEnumerable<T> source, int chunkSize)
     {
         return source
             .Select((x, i) => new { Index = i, Value = x })
