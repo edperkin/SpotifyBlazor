@@ -91,7 +91,7 @@ App will get all users songs and generate playlist meeting parameters
                                 <input @bind="TrackRequest.Instrumentalness" type="range" min="0" max="100" id="instrumentalness" name="instrumentalness" disabled oninput="rangeValue1.innerText = this.value">
                             </div>
                             <div>
-                                <label class="check-label" id='instrumentalness_label' data-bs-toggle="tooltip" data-bs-placement="bottom" title="Tooltip on bottom" onChange="myFunction(instrumentalness_label, 'check-instrumentalness')";>
+                                <label class="check-label" id='instrumentalness_label' data-text="Instrumentalness" onChange="myFunction(instrumentalness_label, 'check-instrumentalness')";>
                                     <img src="icons/drum-solid.svg" alt="drum icon" class="svg-icon"/>
                                     <input type='checkbox' id='check-instrumentalness' class="form-check-input" onchange='check("check-instrumentalness", "instrumentalness")' hidden/>
                                 </label>
@@ -104,7 +104,7 @@ App will get all users songs and generate playlist meeting parameters
                                 <input @bind="TrackRequest.Speechiness" type="range" min="0" max="100" id="speechiness" name="speechiness" disabled oninput="rangeValue2.innerText = this.value">
                             </div>
                             <div>
-                                <label class="check-label" id='speechiness_label' onChange="myFunction(speechiness_label, 'check-speechiness')";>
+                                <label class="check-label" id='speechiness_label' data-text="Speechiness" onChange="myFunction(speechiness_label, 'check-speechiness')";>
                                     <img src="icons/microphone-solid.svg" alt="drum icon" class="svg-icon"/>
                                     <input type='checkbox' id='check-speechiness' class="form-check-input" onchange='check("check-speechiness", "speechiness")' hidden/>
                                 </label>
@@ -117,7 +117,7 @@ App will get all users songs and generate playlist meeting parameters
                                 <input @bind="TrackRequest.Valence" type="range" min="0" max="100" id="valence" name="valence" disabled oninput="rangeValue3.innerText = this.value">
                             </div>
                             <div>
-                                <label class="check-label" id='valence_label' onChange="myFunction(valence_label, 'check-valence')";>
+                                <label class="check-label" id='valence_label' data-text="Valence" onChange="myFunction(valence_label, 'check-valence')";>
                                     <img src="icons/face-smile-solid.svg" alt="drum icon" class="svg-icon"/>
                                     <input type='checkbox' id='check-valence' class="form-check-input" onchange='check("check-valence", "valence")' hidden/>
                                 </label>
@@ -129,7 +129,7 @@ App will get all users songs and generate playlist meeting parameters
                                 <input @bind="TrackRequest.Acousticness" type="range" min="0" max="100" id="acousticness" name="acousticness" disabled oninput="rangeValue4.innerText = this.value">
                             </div>
                             <div>
-                                <label class="check-label" id='acousticness_label' onChange="myFunction(acousticness_label, 'check-acousticness')";>
+                                <label class="check-label" id='acousticness_label' data-text="Acousticness" onChange="myFunction(acousticness_label, 'check-acousticness')";>
                                     <img src="icons/guitar-solid.svg" alt="drum icon" class="svg-icon"/>
                                     <input type='checkbox' id='check-acousticness' class="form-check-input" onchange='check("check-acousticness", "acousticness")' hidden/>
                                 </label>
