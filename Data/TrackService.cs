@@ -6,6 +6,7 @@ namespace SpotifyBlazor.Data;
 public static class TrackService
 {
     public static List<Track>? MatchingTracks;
+    public static event Action OnTracksAdded;
 
     public static async Task GetAudioFeatures(SpotifyClient spotify, SimplePlaylist selectedPlaylist)
     {
@@ -47,6 +48,7 @@ public static class TrackService
 
         AddMatchingTracksToTrackList(trackAudioFeaturesList, basicTracks);
 
+        OnTracksAdded.Invoke();
         Console.WriteLine("Submitted");
 
         TrackRequest.Instrumentalness = null;
